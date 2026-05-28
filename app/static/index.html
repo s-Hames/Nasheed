@@ -1,0 +1,2071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nasheed Safeshare | safe Search & Audio Streaming</title>
+  <meta name="description" content="Safe search and direct audio extraction for nasheeds with a modern scoring engine and distraction-free player.">
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* CSS Variables & Core Design System */
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(22, 28, 45, 0.4);
+      --bg-card-hover: rgba(30, 39, 63, 0.6);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(16, 185, 129, 0.2);
+      --accent: #10b981;
+      --accent-hover: #34d399;
+      --accent-glow: rgba(16, 185, 129, 0.4);
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+      --text-main: #f3f4f6;
+      --text-sub: #9ca3af;
+      --text-muted: #6b7280;
+      
+      --font-outfit: 'Outfit', sans-serif;
+      --font-inter: 'Inter', sans-serif;
+      --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.03) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-inter);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-glow);
+    }
+
+    /* Main Layout */
+    header {
+      backdrop-filter: blur(12px);
+      background: rgba(9, 13, 22, 0.8);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 1rem 2rem;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: var(--font-outfit);
+      font-weight: 800;
+      font-size: 1.5rem;
+      color: var(--text-main);
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+
+    .logo svg {
+      width: 2rem;
+      height: 2rem;
+      fill: var(--accent);
+      filter: drop-shadow(0 0 8px var(--accent-glow));
+    }
+
+    .logo span {
+      background: linear-gradient(135deg, #ffffff 30%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .health-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      padding: 0.5rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-sub);
+      transition: var(--transition-smooth);
+    }
+
+    .health-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--danger);
+      box-shadow: 0 0 8px var(--danger);
+      transition: var(--transition-smooth);
+    }
+
+    .health-dot.healthy {
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.5; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.1); }
+      100% { opacity: 0.5; transform: scale(0.9); }
+    }
+
+    main {
+      flex: 1;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2.5rem 2rem 8rem 2rem;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 2.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      main {
+        grid-template-columns: 1fr;
+        padding-top: 1.5rem;
+      }
+    }
+
+    /* Sidebar Panels */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(16px);
+      border-radius: 1.25rem;
+      padding: 1.5rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .panel-title {
+      font-family: var(--font-outfit);
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-main);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.75rem;
+    }
+
+    .panel-title svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      stroke: var(--accent);
+    }
+
+    .channel-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-height: 250px;
+      overflow-y: auto;
+      padding-right: 0.25rem;
+    }
+
+    .channel-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      padding: 0.6rem 0.85rem;
+      border-radius: 0.75rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-sub);
+      transition: var(--transition-smooth);
+    }
+
+    .channel-item:hover {
+      background: rgba(16, 185, 129, 0.05);
+      border-color: var(--accent-glow);
+      color: var(--text-main);
+      transform: translateX(4px);
+    }
+
+    .channel-icon {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent);
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+
+    .info-box {
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: var(--text-sub);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .info-highlight {
+      background: rgba(59, 130, 246, 0.08);
+      border-left: 3px solid var(--info);
+      padding: 0.75rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .info-list {
+      list-style-type: none;
+      padding-left: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .info-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .info-list li::before {
+      content: "•";
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    /* Content Area */
+    .content-area {
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+
+    /* Hero Unit */
+    .hero {
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .hero h1 {
+      font-family: var(--font-outfit);
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.15;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent) 30%, #60a5fa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      color: var(--text-sub);
+      font-size: 1.1rem;
+      max-width: 700px;
+      font-weight: 300;
+    }
+
+    /* Search Component */
+    .search-box-wrapper {
+      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(16px);
+      border-radius: 1.25rem;
+      padding: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+      transition: var(--transition-smooth);
+    }
+
+    .search-box-wrapper:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 25px var(--accent-glow);
+    }
+
+    .search-icon {
+      padding-left: 1rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .search-icon svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      stroke-width: 2.5;
+    }
+
+    .search-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      flex: 1;
+      padding: 0.75rem 0.5rem;
+      color: var(--text-main);
+      font-family: var(--font-inter);
+      font-size: 1.1rem;
+      font-weight: 400;
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .clear-search-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: none;
+      outline: none;
+      cursor: pointer;
+      color: var(--text-sub);
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-smooth);
+    }
+
+    .clear-search-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+    }
+
+    .search-button {
+      background: var(--accent);
+      border: none;
+      outline: none;
+      cursor: pointer;
+      color: #052e16;
+      font-family: var(--font-outfit);
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 0.85rem 1.75rem;
+      border-radius: 0.85rem;
+      transition: var(--transition-smooth);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .search-button:hover {
+      background: var(--accent-hover);
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .search-button:active {
+      transform: translateY(1px);
+    }
+
+    /* History Tags */
+    .history-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: -1.25rem;
+    }
+
+    .history-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 0.2rem;
+    }
+
+    .history-tag {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      color: var(--text-sub);
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .history-tag:hover {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: var(--accent-glow);
+      color: var(--accent);
+    }
+
+    /* Tracks Grids & Lists */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+      font-family: var(--font-outfit);
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .section-title svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      stroke: var(--accent);
+    }
+
+    .section-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* Track Card */
+    .track-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 1.25rem;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: var(--transition-smooth);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .track-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--accent-glow);
+      box-shadow: 0 12px 30px rgba(16, 185, 129, 0.1);
+      background: var(--bg-card-hover);
+    }
+
+    .thumbnail-wrapper {
+      position: relative;
+      aspect-ratio: 16/9;
+      background: #111827;
+      overflow: hidden;
+    }
+
+    .thumbnail {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: var(--transition-smooth);
+    }
+
+    .track-card:hover .thumbnail {
+      transform: scale(1.05);
+    }
+
+    .card-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(9, 13, 22, 0.65);
+      backdrop-filter: blur(2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: var(--transition-smooth);
+      z-index: 2;
+    }
+
+    .track-card:hover .card-overlay {
+      opacity: 1;
+    }
+
+    .play-btn-circle {
+      width: 3.5rem;
+      height: 3.5rem;
+      background: var(--accent);
+      border: none;
+      outline: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #052e16;
+      box-shadow: 0 0 20px var(--accent-glow);
+      transition: var(--transition-smooth);
+      transform: scale(0.9);
+    }
+
+    .play-btn-circle:hover {
+      background: var(--accent-hover);
+      transform: scale(1.05);
+    }
+
+    .play-btn-circle svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      fill: #052e16;
+      margin-left: 0.15rem; /* center centering */
+    }
+
+    .score-badge {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: rgba(9, 13, 22, 0.8);
+      border: 1px solid var(--accent);
+      backdrop-filter: blur(8px);
+      color: var(--accent);
+      padding: 0.35rem 0.65rem;
+      border-radius: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: var(--font-outfit);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      cursor: pointer;
+      z-index: 3;
+      transition: var(--transition-smooth);
+    }
+
+    .score-badge:hover {
+      background: var(--accent);
+      color: #052e16;
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .score-badge svg {
+      width: 0.85rem;
+      height: 0.85rem;
+      stroke-width: 2.5;
+    }
+
+    .duration-tag {
+      position: absolute;
+      bottom: 0.75rem;
+      right: 0.75rem;
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      z-index: 3;
+    }
+
+    .card-info {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex: 1;
+    }
+
+    .track-title {
+      font-family: var(--font-outfit);
+      font-size: 0.95rem;
+      font-weight: 600;
+      line-height: 1.4;
+      color: var(--text-main);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      min-height: 2.6rem;
+    }
+
+    .track-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      font-size: 0.8rem;
+      color: var(--text-sub);
+    }
+
+    .track-channel {
+      font-weight: 500;
+      color: var(--accent);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 150px;
+    }
+
+    .track-plays {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-weight: 500;
+    }
+
+    .track-plays svg {
+      width: 0.85rem;
+      height: 0.85rem;
+      stroke: var(--text-muted);
+    }
+
+    /* Skeleton States & Loading */
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 2rem;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .spinner {
+      border: 3px solid var(--border-color);
+      border-top: 3px solid var(--accent);
+      border-radius: 50%;
+      width: 2.5rem;
+      height: 2.5rem;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: var(--text-sub);
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-sub);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .no-results svg {
+      width: 3.5rem;
+      height: 3.5rem;
+      stroke: var(--text-muted);
+    }
+
+    /* Global Sticky Bottom Audio Player */
+    .player-bar {
+      position: fixed;
+      bottom: -100px; /* Hidden initially */
+      left: 0;
+      width: 100%;
+      height: 85px;
+      background: rgba(13, 20, 35, 0.75);
+      backdrop-filter: blur(24px) saturate(180%);
+      border-top: 1px solid var(--border-color);
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+      z-index: 1000;
+      transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      padding: 0 2rem;
+    }
+
+    .player-bar.active {
+      bottom: 0;
+    }
+
+    .player-inner {
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+    }
+
+    .player-track-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      width: 300px;
+    }
+
+    .player-thumbnail {
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 0.5rem;
+      object-fit: cover;
+      border: 1px solid var(--border-color);
+    }
+
+    .player-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      overflow: hidden;
+    }
+
+    .player-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .player-channel {
+      font-size: 0.8rem;
+      color: var(--accent);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .player-controls-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      flex: 1;
+      max-width: 600px;
+    }
+
+    .player-buttons {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .control-btn {
+      background: transparent;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      color: var(--text-sub);
+      transition: var(--transition-smooth);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .control-btn:hover {
+      color: var(--text-main);
+    }
+
+    .control-btn.play-pause {
+      background: var(--text-main);
+      color: var(--bg-dark);
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 50%;
+      transition: var(--transition-smooth);
+    }
+
+    .control-btn.play-pause:hover {
+      transform: scale(1.05);
+      background: var(--accent);
+    }
+
+    .control-btn.play-pause svg {
+      width: 1rem;
+      height: 1rem;
+      fill: currentColor;
+    }
+
+    .timeline-container {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .timeline-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.1);
+      outline: none;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      position: relative;
+    }
+
+    .timeline-slider::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 4px;
+      cursor: pointer;
+    }
+
+    .timeline-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+      cursor: pointer;
+      margin-top: -4px;
+      transition: var(--transition-smooth);
+    }
+
+    .timeline-slider:hover::-webkit-slider-thumb {
+      background: var(--text-main);
+      transform: scale(1.2);
+    }
+
+    /* Sound Controls */
+    .player-volume-container {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      width: 200px;
+      justify-content: flex-end;
+    }
+
+    .player-volume-container svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      stroke: var(--text-sub);
+    }
+
+    .volume-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 80px;
+      height: 4px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.1);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--text-sub);
+      cursor: pointer;
+    }
+
+    .volume-slider::-webkit-slider-thumb:hover {
+      background: var(--accent);
+    }
+
+    /* Animated CSS Waveform Visualizer */
+    .waveform-visualizer {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 1.5rem;
+      margin-left: 0.5rem;
+    }
+
+    .visualizer-bar {
+      width: 3px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 1px;
+      transition: var(--transition-smooth);
+    }
+
+    /* Animation classes applied by JS */
+    .player-bar.playing .visualizer-bar {
+      animation: bounce 0.8s ease-in-out infinite alternate;
+    }
+
+    .player-bar.playing .visualizer-bar:nth-child(1) { animation-delay: 0.1s; }
+    .player-bar.playing .visualizer-bar:nth-child(2) { animation-delay: 0.3s; height: 1.2rem; }
+    .player-bar.playing .visualizer-bar:nth-child(3) { animation-delay: 0.2s; height: 0.7rem; }
+    .player-bar.playing .visualizer-bar:nth-child(4) { animation-delay: 0.4s; height: 1.4rem; }
+    .player-bar.playing .visualizer-bar:nth-child(5) { animation-delay: 0.15s; height: 0.9rem; }
+
+    @keyframes bounce {
+      0% { height: 4px; }
+      100% { height: 22px; }
+    }
+
+    /* Interactive Scoring Explanation Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(9, 13, 22, 0.8);
+      backdrop-filter: blur(12px);
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: var(--transition-smooth);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-card {
+      background: rgba(22, 28, 45, 0.85);
+      border: 1px solid var(--accent-glow);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      border-radius: 1.5rem;
+      width: 100%;
+      max-width: 550px;
+      transform: scale(0.9);
+      transition: var(--transition-smooth);
+      overflow: hidden;
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-family: var(--font-outfit);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .close-modal-btn {
+      background: transparent;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-smooth);
+    }
+
+    .close-modal-btn:hover {
+      color: var(--text-main);
+      transform: rotate(90deg);
+    }
+
+    .close-modal-btn svg {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .modal-track-title {
+      font-family: var(--font-outfit);
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: var(--text-main);
+      line-height: 1.4;
+    }
+
+    .score-summary-widget {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      padding: 1rem;
+      border-radius: 1rem;
+    }
+
+    .score-summary-value {
+      font-family: var(--font-outfit);
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--accent);
+      text-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .score-status-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .status-badge-mini {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      display: inline-block;
+      align-self: flex-start;
+    }
+
+    .status-badge-mini.passed {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    .status-badge-mini.failed {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+
+    .score-details-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-height: 250px;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0.85rem;
+      border-radius: 0.75rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .detail-row.bonus {
+      background: rgba(16, 185, 129, 0.05);
+      border: 1px solid rgba(16, 185, 129, 0.15);
+      color: var(--accent);
+    }
+
+    .detail-row.boost {
+      background: rgba(59, 130, 246, 0.05);
+      border: 1px solid rgba(59, 130, 246, 0.15);
+      color: var(--info);
+    }
+
+    .detail-row.penalty {
+      background: rgba(239, 68, 68, 0.05);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+    }
+
+    .detail-row.trusted {
+      background: rgba(245, 158, 11, 0.05);
+      border: 1px solid rgba(245, 158, 11, 0.15);
+      color: var(--warning);
+    }
+
+    .detail-row span:last-child {
+      font-family: var(--font-outfit);
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-top: 1px solid var(--border-color);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    /* Toast Alert Message */
+    .toast-container {
+      position: fixed;
+      top: 5rem;
+      right: 2rem;
+      z-index: 3000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .toast {
+      background: rgba(22, 28, 45, 0.9);
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(12px);
+      padding: 0.85rem 1.25rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transform: translateX(120%);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      font-size: 0.9rem;
+      font-weight: 500;
+      max-width: 320px;
+    }
+
+    .toast.active {
+      transform: translateX(0);
+    }
+
+    .toast.success {
+      border-color: var(--accent);
+      color: var(--text-main);
+    }
+
+    .toast.error {
+      border-color: var(--danger);
+      color: var(--text-main);
+    }
+
+    .toast svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .toast.success svg { stroke: var(--accent); }
+    .toast.error svg { stroke: var(--danger); }
+  </style>
+</head>
+<body>
+
+  <!-- Toast Notification System -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Main Navigation Header -->
+  <header>
+    <div class="nav-container">
+      <a href="/" class="logo">
+        <!-- SVG Emerald Mosque dome outline or Islamic Star/Art Waveform logo -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15.5h-2v-2h2v2zm0-4h-2v-6h2v6z"/>
+        </svg>
+        <span>Nasheed Safeshare</span>
+      </a>
+      
+      <!-- API Health indicator -->
+      <div class="health-badge">
+        <span class="health-dot" id="healthDot"></span>
+        <span id="healthText">Connecting to API...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Interactive Workspace Grid -->
+  <main>
+    <!-- Left Sidebar: Settings, Safeguard Info, and Channel Guidelines -->
+    <div class="sidebar">
+      
+      <!-- Safe Scoring system explainer -->
+      <div class="panel">
+        <div class="panel-title">
+          <!-- Shield SVG -->
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          Safe Filtering System
+        </div>
+        <div class="info-box">
+          <p>Every search result is evaluated in real-time before being cataloged. Videos are analyzed by title and publisher metadata.</p>
+          <div class="info-highlight">
+            Min Suitability Score: <strong>+10</strong>
+          </div>
+          <ul class="info-list">
+            <li><strong>Strong Nasheed Terms</strong>: +20 points each (e.g. <em>nasheed</em>, <em>naat</em>, <em>hamd</em>)</li>
+            <li><strong>Voice/Islamic Signals</strong>: +10 points each (e.g. <em>vocals only</em>, <em>without music</em>)</li>
+            <li><strong>Safe Channel Bonus</strong>: +25 points</li>
+            <li><strong>Instrumental/Vlog/Remix Penalty</strong>: -100 points</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Seeded safe channels -->
+      <div class="panel">
+        <div class="panel-title">
+          <!-- Shield Check SVG -->
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+          </svg>
+          Trusted Publishers
+        </div>
+        <div class="channel-list" id="trustedChannelsList">
+          <!-- Injected via JavaScript -->
+          <div class="channel-item"><div class="channel-icon">M</div>Muhammad Al Muqit</div>
+          <div class="channel-item"><div class="channel-icon">L</div>Labbayk</div>
+          <div class="channel-item"><div class="channel-icon">A</div>Ahmed Bukhatir</div>
+          <div class="channel-item"><div class="channel-icon">M</div>Mishary Rashid Alafasy</div>
+          <div class="channel-item"><div class="channel-icon">Z</div>Zain Bhikha</div>
+          <div class="channel-item"><div class="channel-icon">S</div>Sami Yusuf</div>
+          <div class="channel-item"><div class="channel-icon">M</div>Maher Zain</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Container: Search inputs and Track catalog grids -->
+    <div class="content-area">
+      
+      <!-- Hero banner -->
+      <section class="hero">
+        <h1>Safely Search & Stream <span>Nasheeds</span></h1>
+        <p>A distractions-free directory that processes and plays clean vocal-only nasheeds by screening out background music, remixes, and explicit items.</p>
+      </section>
+
+      <!-- Advanced Search Bar -->
+      <section style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <div class="search-box-wrapper">
+          <div class="search-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search for safe nasheeds (e.g. 'Way of the tears', 'My Hope')..." autocomplete="off">
+          <button class="clear-search-btn" id="clearBtn">
+            <svg style="width:1.2rem; height:1.2rem" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+          <button class="search-button" id="searchBtn">
+            <span>Search</span>
+          </button>
+        </div>
+
+        <!-- Dynamic Search history tags -->
+        <div class="history-tags" id="historyTagsContainer" style="display: none;">
+          <span class="history-title">Recent Queries</span>
+          <!-- Injected via JavaScript -->
+        </div>
+      </section>
+
+      <!-- Dynamic listings section (Trending / Search Results) -->
+      <section>
+        <div class="section-header">
+          <h2 class="section-title" id="sectionTitle">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+            Popular Cataloged Nasheeds
+          </h2>
+          <div class="section-actions" id="resultsCount"></div>
+        </div>
+
+        <!-- Render Target Grid -->
+        <div class="grid-container" id="tracksGrid">
+          <!-- Injected via JS (Grid list of track cards) -->
+          <div class="loading-container">
+            <div class="spinner"></div>
+            <div class="loading-text">Loading cataloged nasheeds...</div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Interactive Score Breakdown Modal (Frosted Overlays) -->
+  <div class="modal-overlay" id="scoreModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Suitability Score Analysis</h3>
+        <button class="close-modal-btn" id="closeModalBtn">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-track-title" id="modalTrackTitle">Track Title Loading...</div>
+        
+        <div class="score-summary-widget">
+          <div class="score-summary-value" id="modalScoreValue">+45</div>
+          <div class="score-status-text">
+            <span class="status-badge-mini passed" id="modalStatusBadge">Passed Filter</span>
+            <span style="font-size:0.8rem; color:var(--text-sub); margin-top:0.25rem;">Threshold: +10</span>
+          </div>
+        </div>
+
+        <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-main); margin-top: 0.5rem;">Score Breakdown</div>
+        <div class="score-details-list" id="modalDetailsList">
+          <!-- Dynamic details injected by analysis JS -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        Score calculations are computed on-the-fly dynamically. Positive scores verify compliance, negative indicators filter out unsuitable media.
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Sticky Bottom Player (Acrylic Visualizer design) -->
+  <div class="player-bar" id="playerBar">
+    <div class="player-inner">
+      
+      <!-- Left Track Info -->
+      <div class="player-track-info">
+        <img class="player-thumbnail" id="playerThumb" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect width='100' height='100' fill='%231f2937'/></svg>" alt="Thumbnail">
+        <div class="player-text">
+          <div class="player-title" id="playerTitle">No nasheed selected</div>
+          <div class="player-channel" id="playerChannel">-</div>
+        </div>
+        
+        <!-- Tiny waveform bars inside track info -->
+        <div class="waveform-visualizer" id="visualizer">
+          <div class="visualizer-bar"></div>
+          <div class="visualizer-bar"></div>
+          <div class="visualizer-bar"></div>
+          <div class="visualizer-bar"></div>
+          <div class="visualizer-bar"></div>
+        </div>
+      </div>
+
+      <!-- Middle Controls (Play, timelines, seeks) -->
+      <div class="player-controls-container">
+        <div class="player-buttons">
+          <!-- Back 10s -->
+          <button class="control-btn" id="seekBackBtn" title="Back 10 seconds">
+            <svg style="width:1.5rem; height:1.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"></path></svg>
+          </button>
+          
+          <!-- Play / Pause -->
+          <button class="control-btn play-pause" id="playerPlayBtn" title="Play / Pause">
+            <!-- Play SVG -->
+            <svg id="playIconSvg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>
+            <!-- Pause SVG (Hidden by default) -->
+            <svg id="pauseIconSvg" style="display:none;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          </button>
+
+          <!-- Forward 10s -->
+          <button class="control-btn" id="seekForwardBtn" title="Forward 10 seconds">
+            <svg style="width:1.5rem; height:1.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.934 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.334-4zM19.934 12.8a1 1 0 000-1.6l-5.334-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.334-4z"></path></svg>
+          </button>
+        </div>
+
+        <div class="timeline-container">
+          <span id="playerCurrentTime">00:00</span>
+          <input type="range" class="timeline-slider" id="playerSlider" min="0" max="100" value="0">
+          <span id="playerTotalDuration">00:00</span>
+        </div>
+      </div>
+
+      <!-- Right Sound Controls -->
+      <div class="player-volume-container">
+        <!-- Mute / Unmute Button -->
+        <button class="control-btn" id="volumeBtn" title="Mute / Unmute">
+          <svg id="volumeOnSvg" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
+          </svg>
+          <svg id="volumeMutedSvg" style="display:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zm12.308-5.308l3.414 3.414m0-3.414l-3.414 3.414"></path>
+          </svg>
+        </button>
+        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="80">
+      </div>
+
+    </div>
+  </div>
+
+  <!-- HTML5 Native Audio element -->
+  <audio id="audioEngine" style="display:none;"></audio>
+
+  <!-- Application logic wiring -->
+  <script>
+    // State Manager
+    const state = {
+      trending: [],
+      searchResults: [],
+      activeTrack: null,
+      history: JSON.parse(localStorage.getItem('nasheed_search_history') || '[]'),
+      isSearching: false,
+      lastQuery: ''
+    };
+
+    // DOM References
+    const DOM = {
+      healthDot: document.getElementById('healthDot'),
+      healthText: document.getElementById('healthText'),
+      searchInput: document.getElementById('searchInput'),
+      clearBtn: document.getElementById('clearBtn'),
+      searchBtn: document.getElementById('searchBtn'),
+      historyTagsContainer: document.getElementById('historyTagsContainer'),
+      sectionTitle: document.getElementById('sectionTitle'),
+      resultsCount: document.getElementById('resultsCount'),
+      tracksGrid: document.getElementById('tracksGrid'),
+      
+      // Modal
+      scoreModal: document.getElementById('scoreModal'),
+      closeModalBtn: document.getElementById('closeModalBtn'),
+      modalTrackTitle: document.getElementById('modalTrackTitle'),
+      modalScoreValue: document.getElementById('modalScoreValue'),
+      modalStatusBadge: document.getElementById('modalStatusBadge'),
+      modalDetailsList: document.getElementById('modalDetailsList'),
+
+      // Player
+      playerBar: document.getElementById('playerBar'),
+      playerThumb: document.getElementById('playerThumb'),
+      playerTitle: document.getElementById('playerTitle'),
+      playerChannel: document.getElementById('playerChannel'),
+      audioEngine: document.getElementById('audioEngine'),
+      playerPlayBtn: document.getElementById('playerPlayBtn'),
+      playIconSvg: document.getElementById('playIconSvg'),
+      pauseIconSvg: document.getElementById('pauseIconSvg'),
+      playerCurrentTime: document.getElementById('playerCurrentTime'),
+      playerTotalDuration: document.getElementById('playerTotalDuration'),
+      playerSlider: document.getElementById('playerSlider'),
+      seekBackBtn: document.getElementById('seekBackBtn'),
+      seekForwardBtn: document.getElementById('seekForwardBtn'),
+      
+      // Volume
+      volumeBtn: document.getElementById('volumeBtn'),
+      volumeOnSvg: document.getElementById('volumeOnSvg'),
+      volumeMutedSvg: document.getElementById('volumeMutedSvg'),
+      volumeSlider: document.getElementById('volumeSlider'),
+      
+      // Container
+      toastContainer: document.getElementById('toastContainer')
+    };
+
+    // Safe Scoring simulation lists matching Python services/scoring.py
+    const STRONG_NASHEED_INDICATORS = ["nasheed", "anasheed", "نشيد", "نشید", "naat", "hamd", "qasida", "qaseedah", "munajat", "ilahi", "ilahee"];
+    const BOOST_WORDS = [
+      "no music", "vocals only", "vocal only", "without music",
+      "islamic", "islam", "muslim", "prophet", "muhammad", "allah",
+      "quran", "sunnah", "halal", "deen", "ummah", "dawah",
+      "ramadan", "eid", "hijab", "jannah", "taqwa", "dhikr", "zikr",
+      "arabic vocal", "islamic song", "islamic vocal",
+      "omar esa", "siedd", "muhammad al muqit", "mishary rashid",
+      "maher zain", "sami yusuf", "ahmed bukhatir",
+      "one path network", "mercifulservant"
+    ];
+    const BLACKLIST_WORDS = [
+      "remix", "slowed", "reverb", "lofi", "lo-fi", "bass boosted", "8d audio", "nightcore", "phonk", "trap", "beat drop",
+      "music video", "official video", "lyrics video", "explicit", "uncensored", "18+", "nsfw", "sexy", "twerk", "horny", "porn", "xxx", "nude", "naked",
+      "dj", "club", "rave", "edm", "hip hop", "rap", "rock", "pop music", "k-pop", "kpop", "reggaeton",
+      "movie", "film", "trailer", "gameplay", "gaming", "reaction", "prank", "meme", "funny", "comedy", "roast", "asmr", "mukbang", "unboxing", "haul", "vlog",
+      "edit", "status", "whatsapp status", "ringtone", "shorts", "tiktok"
+    ];
+    const BOUNDARY_MATCH_WORDS = ["dj", "edit", "lofi", "rap", "edm", "pop", "rock", "horny", "rave", "nude", "meme", "haul", "vlog", "xxx"];
+    const TRUSTED_CHANNELS = ["Muhammad Al Muqit", "Labbayk", "Ahmed Bukhatir", "Mishary Rashid Alafasy", "Zain Bhikha", "Sami Yusuf", "Maher Zain"];
+
+    // Toast notification function
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      const icon = type === 'success' 
+        ? `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+        : `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`;
+        
+      toast.innerHTML = `${icon}<span>${message}</span>`;
+      DOM.toastContainer.appendChild(toast);
+      
+      // Trigger animation
+      setTimeout(() => toast.classList.add('active'), 50);
+      
+      // Remove after 3.5 seconds
+      setTimeout(() => {
+        toast.classList.remove('active');
+        setTimeout(() => toast.remove(), 400);
+      }, 3500);
+    }
+
+    // Format seconds to MM:SS
+    function formatTime(sec) {
+      if (isNaN(sec) || sec === null) return "00:00";
+      const minutes = Math.floor(sec / 60);
+      const seconds = Math.floor(sec % 60);
+      return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    // Dynamic Scoring Analysis for UI popups
+    function analyzeScore(title, channel) {
+      const titleLower = title.toLowerCase();
+      const channelLower = channel.toLowerCase();
+      const combined = `${titleLower} ${channelLower}`;
+      
+      let score = 0;
+      const details = [];
+      
+      // 1. Strong nasheed indicators (+20 each)
+      STRONG_NASHEED_INDICATORS.forEach(word => {
+        if (combined.includes(word)) {
+          score += 20;
+          details.push({ factor: `Strong Indicator Match: "${word}"`, change: "+20", type: "bonus" });
+        }
+      });
+      
+      // 2. Moderate boost words (+10 each)
+      BOOST_WORDS.forEach(word => {
+        if (combined.includes(word)) {
+          score += 10;
+          details.push({ factor: `Vocal Boost Signal: "${word}"`, change: "+10", type: "boost" });
+        }
+      });
+      
+      // 3. Blacklist words (-100 each)
+      BLACKLIST_WORDS.forEach(word => {
+        if (BOUNDARY_MATCH_WORDS.includes(word)) {
+          const regex = new RegExp(`\\b${word}\\b`, 'i');
+          if (regex.test(combined)) {
+            score -= 100;
+            details.push({ factor: `Blacklisted Media Word: "${word}"`, change: "-100", type: "penalty" });
+          }
+        } else {
+          if (combined.includes(word)) {
+            score -= 100;
+            details.push({ factor: `Blacklisted word: "${word}"`, change: "-100", type: "penalty" });
+          }
+        }
+      });
+      
+      // 4. Trusted channel bonus (+25)
+      const isTrusted = TRUSTED_CHANNELS.some(tc => tc.toLowerCase() === channelLower);
+      if (isTrusted) {
+        score += 25;
+        details.push({ factor: `Seeded Safe Channel Bonus`, change: "+25", type: "trusted" });
+      }
+      
+      return { score, details };
+    }
+
+    // Health Check Polling
+    async function verifyApiHealth() {
+      try {
+        const res = await fetch('/health');
+        const payload = await res.json();
+        
+        if (payload.success && payload.data.status === 'healthy') {
+          DOM.healthDot.className = 'health-dot healthy';
+          DOM.healthText.textContent = `API Online (${payload.data.database === 'healthy' ? 'DB Connected' : 'DB Offline'})`;
+        } else {
+          throw new Error('API reported unhealthy status');
+        }
+      } catch (err) {
+        DOM.healthDot.className = 'health-dot';
+        DOM.healthText.textContent = 'API Offline';
+        console.error('API Health Check Error:', err);
+      }
+    }
+
+    // Render Search History UI Tags
+    function renderHistoryTags() {
+      if (state.history.length === 0) {
+        DOM.historyTagsContainer.style.display = 'none';
+        return;
+      }
+      
+      DOM.historyTagsContainer.style.display = 'flex';
+      
+      // Remove any existing tags except title
+      const title = DOM.historyTagsContainer.querySelector('.history-title');
+      DOM.historyTagsContainer.innerHTML = '';
+      DOM.historyTagsContainer.appendChild(title);
+      
+      state.history.slice(0, 6).forEach(query => {
+        const tag = document.createElement('span');
+        tag.className = 'history-tag';
+        tag.textContent = query;
+        tag.addEventListener('click', () => {
+          DOM.searchInput.value = query;
+          performSearch(query);
+        });
+        DOM.historyTagsContainer.appendChild(tag);
+      });
+    }
+
+    // Save Search Query to LocalStorage history
+    function saveQueryToHistory(query) {
+      const clean = query.trim().toLowerCase();
+      if (!clean) return;
+      
+      let index = state.history.indexOf(clean);
+      if (index > -1) {
+        state.history.splice(index, 1);
+      }
+      state.history.unshift(clean);
+      
+      // Cap at 10 items
+      state.history = state.history.slice(0, 10);
+      localStorage.setItem('nasheed_search_history', JSON.stringify(state.history));
+      renderHistoryTags();
+    }
+
+    // Render Track Cards Grid Helper
+    function renderTracks(tracksList, isSearchResult = false) {
+      DOM.tracksGrid.innerHTML = '';
+      
+      if (!tracksList || tracksList.length === 0) {
+        DOM.tracksGrid.innerHTML = `
+          <div class="no-results" style="grid-column: 1 / -1;">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>No matching nasheeds found. Try a different query.</div>
+          </div>
+        `;
+        DOM.resultsCount.textContent = '0 items found';
+        return;
+      }
+      
+      DOM.resultsCount.textContent = `${tracksList.length} items cataloged`;
+
+      tracksList.forEach(track => {
+        const card = document.createElement('div');
+        card.className = 'track-card';
+        
+        // Duration conversion
+        const formattedDur = formatTime(track.duration);
+        
+        card.innerHTML = `
+          <div class="thumbnail-wrapper">
+            <img class="thumbnail" src="${track.thumbnail || 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'><rect width=\'100\' height=\'100\' fill=\'%231f2937\'/></svg>'}" alt="${track.title}" loading="lazy">
+            <div class="card-overlay">
+              <button class="play-btn-circle" title="Stream Audio" data-id="${track.youtube_id}">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>
+              </button>
+            </div>
+            <div class="score-badge" data-id="${track.youtube_id}" title="Click to view scoring parameters">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              +${track.score}
+            </div>
+            <span class="duration-tag">${formattedDur}</span>
+          </div>
+          <div class="card-info">
+            <div class="track-title" title="${track.title}">${track.title}</div>
+            <div class="track-meta">
+              <span class="track-channel" title="${track.channel}">${track.channel}</span>
+              <span class="track-plays">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                ${track.play_count || 0} plays
+              </span>
+            </div>
+          </div>
+        `;
+        
+        // Add click listener to Play Button inside overlay
+        card.querySelector('.play-btn-circle').addEventListener('click', (e) => {
+          e.stopPropagation();
+          streamTrack(track);
+        });
+
+        // Add click listener to Score Badge to open explainer modal
+        card.querySelector('.score-badge').addEventListener('click', (e) => {
+          e.stopPropagation();
+          openScoreModal(track);
+        });
+
+        DOM.tracksGrid.appendChild(card);
+      });
+    }
+
+    // Load Trending Tracks from API
+    async function loadTrendingTracks() {
+      try {
+        const res = await fetch('/trending?limit=12');
+        const payload = await res.json();
+        
+        if (payload.success) {
+          state.trending = payload.data;
+          // Re-draw if we aren't in search mode
+          if (!state.isSearching) {
+            renderTracks(state.trending);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load trending nasheeds:', err);
+        showToast('Could not fetch trending nasheeds. Please reload.', 'error');
+      }
+    }
+
+    // Perform Search Query
+    async function performSearch(query) {
+      if (!query || !query.trim()) return;
+      
+      const cleanQ = query.trim();
+      state.isSearching = true;
+      state.lastQuery = cleanQ;
+      
+      // Update UI title and show loading spinner
+      DOM.sectionTitle.innerHTML = `
+        <svg style="width:1.5rem; height:1.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        Search Results for "${cleanQ}"
+      `;
+      DOM.tracksGrid.innerHTML = `
+        <div class="loading-container" style="grid-column: 1 / -1;">
+          <div class="spinner"></div>
+          <div class="loading-text">Fetching matching safe nasheeds...</div>
+        </div>
+      `;
+      DOM.clearBtn.style.display = 'flex';
+
+      try {
+        const res = await fetch(`/search?q=${encodeURIComponent(cleanQ)}`);
+        const payload = await res.json();
+        
+        if (payload.success) {
+          state.searchResults = payload.data;
+          renderTracks(state.searchResults, true);
+          saveQueryToHistory(cleanQ);
+        } else {
+          throw new Error(payload.detail || 'Search failed');
+        }
+      } catch (err) {
+        console.error('Search failed:', err);
+        showToast(err.message || 'Failed to fetch search results. Check network.', 'error');
+        
+        // Show empty results state
+        DOM.tracksGrid.innerHTML = `
+          <div class="no-results" style="grid-column: 1 / -1;">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <div>An error occurred while fetching. Verify server and query.</div>
+          </div>
+        `;
+      }
+    }
+
+    // Modal Interaction
+    function openScoreModal(track) {
+      DOM.modalTrackTitle.textContent = track.title;
+      DOM.modalScoreValue.textContent = `+${track.score}`;
+      
+      const analysis = analyzeScore(track.title, track.channel);
+      
+      // Set status badge color
+      if (track.score >= 10) {
+        DOM.modalStatusBadge.className = 'status-badge-mini passed';
+        DOM.modalStatusBadge.textContent = 'Passed Safe Filter';
+      } else {
+        DOM.modalStatusBadge.className = 'status-badge-mini failed';
+        DOM.modalStatusBadge.textContent = 'Failed Filter';
+      }
+      
+      // Inject score factors list
+      DOM.modalDetailsList.innerHTML = '';
+      if (analysis.details.length === 0) {
+        DOM.modalDetailsList.innerHTML = `
+          <div style="font-size:0.85rem; color:var(--text-muted); text-align:center; padding:1rem;">
+            No direct bonus or penalty words identified. Score matches base standard.
+          </div>
+        `;
+      } else {
+        analysis.details.forEach(item => {
+          const row = document.createElement('div');
+          row.className = `detail-row ${item.type}`;
+          row.innerHTML = `
+            <span>${item.factor}</span>
+            <span>${item.change}</span>
+          `;
+          DOM.modalDetailsList.appendChild(row);
+        });
+      }
+      
+      DOM.scoreModal.classList.add('active');
+    }
+
+    function closeModal() {
+      DOM.scoreModal.classList.remove('active');
+    }
+
+    // Stream audio player setup
+    async function streamTrack(track) {
+      showToast(`Loading streaming audio for "${track.title.slice(0,25)}..."`);
+      
+      // Update Bottom Player view
+      DOM.playerTitle.textContent = track.title;
+      DOM.playerChannel.textContent = track.channel;
+      DOM.playerThumb.src = track.thumbnail || 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'><rect width=\'100\' height=\'100\' fill=\'%231f2937\'/></svg>';
+      
+      // Keep track of active state
+      state.activeTrack = track;
+      DOM.playerBar.classList.add('active');
+
+      try {
+        // Fetch audio stream URL from backend
+        const res = await fetch(`/stream/${track.youtube_id}`);
+        const payload = await res.json();
+        
+        if (payload.success && payload.data.stream_url) {
+          const streamUrl = payload.data.stream_url;
+          
+          // Wire up HTML5 audio element
+          DOM.audioEngine.src = streamUrl;
+          DOM.audioEngine.load();
+          
+          const playPromise = DOM.audioEngine.play();
+          if (playPromise !== undefined) {
+            playPromise.then(() => {
+              updatePlayerPlayBtnState(true);
+              showToast(`Now Playing: ${track.title.slice(0, 20)}...`);
+            }).catch(error => {
+              console.error("Audio playback error:", error);
+              showToast("Playback was blocked. Please click play manually.", "error");
+              updatePlayerPlayBtnState(false);
+            });
+          }
+          
+          // Increments play count locally to feel responsive!
+          track.play_count = (track.play_count || 0) + 1;
+          
+          // Refresh the search or trending grid displays to update plays count badge
+          if (state.isSearching) {
+            renderTracks(state.searchResults, true);
+          } else {
+            renderTracks(state.trending);
+          }
+          
+        } else {
+          throw new Error('Stream URL not found in API response');
+        }
+      } catch (err) {
+        console.error('Streaming extraction failed:', err);
+        showToast('Failed to extract audio stream from YouTube. Try another video.', 'error');
+        DOM.playerBar.classList.remove('active');
+      }
+    }
+
+    // Toggle Play/Pause on Sticky Bar
+    function togglePlayback() {
+      if (!DOM.audioEngine.src) return;
+      
+      if (DOM.audioEngine.paused) {
+        DOM.audioEngine.play()
+          .then(() => updatePlayerPlayBtnState(true))
+          .catch(() => showToast('Could not resume stream', 'error'));
+      } else {
+        DOM.audioEngine.pause();
+        updatePlayerPlayBtnState(false);
+      }
+    }
+
+    function updatePlayerPlayBtnState(isPlaying) {
+      if (isPlaying) {
+        DOM.playerBar.classList.add('playing');
+        DOM.playIconSvg.style.display = 'none';
+        DOM.pauseIconSvg.style.display = 'block';
+      } else {
+        DOM.playerBar.classList.remove('playing');
+        DOM.playIconSvg.style.display = 'block';
+        DOM.pauseIconSvg.style.display = 'none';
+      }
+    }
+
+    // Seek track
+    function seekTrack() {
+      const percentage = DOM.playerSlider.value;
+      if (DOM.audioEngine.duration) {
+        DOM.audioEngine.currentTime = (percentage / 100) * DOM.audioEngine.duration;
+      }
+    }
+
+    // Volume Adjustment
+    function adjustVolume() {
+      const vol = DOM.volumeSlider.value / 100;
+      DOM.audioEngine.volume = vol;
+      
+      // Update SVGs
+      if (vol === 0) {
+        DOM.volumeOnSvg.style.display = 'none';
+        DOM.volumeMutedSvg.style.display = 'block';
+      } else {
+        DOM.volumeOnSvg.style.display = 'block';
+        DOM.volumeMutedSvg.style.display = 'none';
+      }
+    }
+
+    function toggleMute() {
+      if (DOM.audioEngine.volume > 0) {
+        state.preMuteVolume = DOM.volumeSlider.value;
+        DOM.volumeSlider.value = 0;
+      } else {
+        DOM.volumeSlider.value = state.preMuteVolume || 80;
+      }
+      adjustVolume();
+    }
+
+    // Event Bindings
+    function bindEvents() {
+      // Search Actions
+      DOM.searchBtn.addEventListener('click', () => performSearch(DOM.searchInput.value));
+      DOM.searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') performSearch(DOM.searchInput.value);
+      });
+      
+      // Toggle search text clear button
+      DOM.searchInput.addEventListener('input', () => {
+        if (DOM.searchInput.value) {
+          DOM.clearBtn.style.display = 'flex';
+        } else {
+          DOM.clearBtn.style.display = 'none';
+        }
+      });
+
+      DOM.clearBtn.addEventListener('click', () => {
+        DOM.searchInput.value = '';
+        DOM.clearBtn.style.display = 'none';
+        state.isSearching = false;
+        DOM.sectionTitle.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          </svg>
+          Popular Cataloged Nasheeds
+        `;
+        renderTracks(state.trending);
+      });
+
+      // Modal Dismissals
+      DOM.closeModalBtn.addEventListener('click', closeModal);
+      DOM.scoreModal.addEventListener('click', (e) => {
+        if (e.target === DOM.scoreModal) closeModal();
+      });
+
+      // Player Buttons
+      DOM.playerPlayBtn.addEventListener('click', togglePlayback);
+      
+      // Audio element listeners
+      DOM.audioEngine.addEventListener('timeupdate', () => {
+        const cur = DOM.audioEngine.currentTime;
+        const dur = DOM.audioEngine.duration;
+        
+        DOM.playerCurrentTime.textContent = formatTime(cur);
+        
+        if (dur) {
+          DOM.playerTotalDuration.textContent = formatTime(dur);
+          DOM.playerSlider.value = (cur / dur) * 100;
+        }
+      });
+      
+      DOM.audioEngine.addEventListener('loadedmetadata', () => {
+        DOM.playerTotalDuration.textContent = formatTime(DOM.audioEngine.duration);
+      });
+
+      DOM.audioEngine.addEventListener('ended', () => {
+        updatePlayerPlayBtnState(false);
+        DOM.playerSlider.value = 0;
+        DOM.playerCurrentTime.textContent = '00:00';
+      });
+
+      DOM.playerSlider.addEventListener('input', seekTrack);
+      
+      // Back/Forward 10s seeks
+      DOM.seekBackBtn.addEventListener('click', () => {
+        DOM.audioEngine.currentTime = Math.max(0, DOM.audioEngine.currentTime - 10);
+      });
+      
+      DOM.seekForwardBtn.addEventListener('click', () => {
+        if (DOM.audioEngine.duration) {
+          DOM.audioEngine.currentTime = Math.min(DOM.audioEngine.duration, DOM.audioEngine.currentTime + 10);
+        }
+      });
+
+      // Volume Controls
+      DOM.volumeSlider.addEventListener('input', adjustVolume);
+      DOM.volumeBtn.addEventListener('click', toggleMute);
+    }
+
+    // App Initialization
+    async function init() {
+      bindEvents();
+      renderHistoryTags();
+      
+      // Run quick check & pull items
+      await verifyApiHealth();
+      await loadTrendingTracks();
+      
+      // Background poll health status every 20s
+      setInterval(verifyApiHealth, 20000);
+    }
+
+    // Kickstart application
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

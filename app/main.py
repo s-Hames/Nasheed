@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+import os
 from sqlalchemy import select
 
 from app.core.config import settings
@@ -93,6 +95,23 @@ app.add_middleware(
 
 # Standardized app exception handlers
 register_exception_handlers(app)
+
+@app.get("/", response_class=HTMLResponse)
+async def get_index():
+    """
+    Serve the single-page application dashboard on the root path.
+    """
+    static_file_path = os.path.join(os.path.dirname(__file__), "static", "index.html")
+    if os.path.exists(static_file_path):
+        try:
+            with open(static_file_path, "r", encoding="utf-8") as f:
+                return HTMLResponse(content=f.read(), status_code=200)
+        except Exception as e:
+            logger.error(f"Error reading index.html: {str(e)}")
+    return HTMLResponse(
+        content="<div style='display:flex;justify-content:center;align-items:center;height:100vh;background-color:#0d1117;color:#fff;font-family:sans-serif;'><h1>Nasheed API Ready. Dashboard is loading...</h1></div>",
+        status_code=200
+    )
 
 # Mounting routes
 app.include_router(health_router, tags=["Health"])
