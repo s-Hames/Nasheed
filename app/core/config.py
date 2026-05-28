@@ -42,9 +42,17 @@ class Settings(BaseSettings):
             dest_db = "/tmp/nasheed.db"
             if os.path.exists(src_db) and not os.path.exists(dest_db):
                 try:
-                    shutil.copy(src_db, dest_db)
+                    shutil.copyfile(src_db, dest_db)
                 except Exception as e:
                     print(f"Failed to copy packaged nasheed.db to /tmp: {e}")
+            
+            # Ensure the copied database is explicitly writable, as files copied from the
+            # read-only lambda package directory may inherit read-only permission flags.
+            if os.path.exists(dest_db):
+                try:
+                    os.chmod(dest_db, 0o666)
+                except Exception as e:
+                    print(f"Failed to set write permissions on /tmp/nasheed.db: {e}")
         return self
 
 settings = Settings()
