@@ -27,8 +27,24 @@ class Settings(BaseSettings):
         Vercel's serverless filesystem is read-only except /tmp.
         Force SQLite to use /tmp regardless of other configuration sources.
         """
-        if os.environ.get("VERCEL") and "sqlite" in self.DATABASE_URL:
+        is_vercel = (
+            os.environ.get("VERCEL") is not None
+            or os.environ.get("AWS_LAMBDA_FUNCTION_NAME") is not None
+            or not os.access(".", os.W_OK)
+        )
+        if is_vercel and "sqlite" in self.DATABASE_URL:
             self.DATABASE_URL = "sqlite+aiosqlite:////tmp/nasheed.db"
+            
+            # Copy existing packaged db to /tmp if it exists and hasn't been copied yet.
+            # This preserves any pre-seeded data/cached videos from the local SQLite db.
+            import shutil
+            src_db = "./nasheed.db"
+            dest_db = "/tmp/nasheed.db"
+            if os.path.exists(src_db) and not os.path.exists(dest_db):
+                try:
+                    shutil.copy(src_db, dest_db)
+                except Exception as e:
+                    print(f"Failed to copy packaged nasheed.db to /tmp: {e}")
         return self
 
 settings = Settings()
